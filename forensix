@@ -1,0 +1,348 @@
+#! /usr/bin/python
+import os
+import sys
+def help():
+	print("+***************************************+")
+	print("*           FORENSIX                    *")
+	print("*---------------------------------------*")
+	print("* Acciones:                             *")
+	print("*                                       *")
+	print("* cb -> copia bit a bit                 *")
+	print("* mt -> montar imagen                   *")
+	print("* pt -> particionar archivo             *")
+	print("* er -> busqueda expresiones regulares  *")
+	print("* vt -> virustotal                      *")
+	print("*                                       *")
+	print("+***************************************+")
+def esterilizacion(argumentos):
+	print(argumentos[0])
+	print(argumentos[1])
+	print(argumentos[2])
+	print(argumentos[3])
+	print(argumentos[4])
+	print(argumentos[5])
+	print(argumentos[6])
+	print(argumentos[7])
+	print(argumentos[8])
+	#sh ./limpiar.sh [#repeticiones ej:2] [unidad de disco ej:/dev/sdb1] [tamaño bloque ej:1024]
+def recuparArchivos(argumentos):
+	if(len(argumentos)==2):
+		print ("ayuda copia verificar la integridad de la imgagen")
+	else:	
+		destino=argumentos[2]#ruta de destino (carpeta)
+		imagen=argumentos[3]#ruta de la imagen DD (archivo)
+		print("ruta destino ---->"+imagen_1)
+		print("ruta imagen DD -->"+imagen_2)
+		if(os.path.isdir(destino) and os.path.isfile(imagen)):
+			destino=argumentos[2].replace(' ','\ ')
+			imagen=argumentos[3].replace(' ','\ ')
+			##info(file_copy)
+			os.system("sudo mkdir "+destino+"archivosRecuperados")
+			os.system("photorec /log /debug /d " + rutaDestino + "/archivosRecuperados /cmd " + imagen +  " options,mode_ext2,5,search")
+			print("proceso finalizado")
+			#os.system("photorec /log /debug /d " + rutaDestino + "/archivosRecuperados /cmd /dev/loop0 options,mode_ext2,5,search")
+            #os.system("scalpel imagen -o /dev/" + discoDestino + "/archivosRecuperados")
+            
+		else:
+			print("no validos")	
+def copiaBitBit(argumentos):
+	cadena='Copia Bit a bit: \n**************************'
+	if(len(argumentos)==2):
+		print ("+******************************************************+")
+		print ("*                Ayuda copia bit a bit                 *")
+		print ("*------------------------------------------------------*")
+		print ("* Copiar todo el contenido de un Archivo, bit a bit *")
+		print ("*------------------------------------------------------*")
+		print ("* La sintaxis que debe usar es:                        *")
+		print ("* forensix cb <archivo> <path_copia> <nombre_copia>      *")
+		print ("*------------------------------------------------------*")
+		print ("* archivo: ruta del archivo original                   *")
+		print ("* path_copia: ruta donde se va a guardar la copia      *")
+		print ("* nombre_copia: nombre que se le asigna a la copia     *")
+		print ("*                                                      *")
+		print ("+******************************************************+")
+	else:	
+		file_copy=argumentos[2]
+		path_copy=argumentos[3]
+		if(os.path.isfile(file_copy) and checkPath(path_copy)):
+			file_copy=argumentos[2].replace(' ','\ ')
+			path_copy=argumentos[3].replace(' ','\ ')
+			cadena=cadena+info(file_copy)
+			retorno=os.popen('dd if='+file_copy+" of="+path_copy)
+			cadena=cadena+info(path_copy)
+		else:
+			print("no validos")
+		if(checkPerito(argumentos) and len(argumentos)==6):	
+			perito(cadena,argumentos[5])	
+def perito(texto,archivo):
+	try:
+		f=open(archivo, "a+")
+		f.write(texto)
+		f.close()
+	except:
+		f=open(archivo, "w")
+		f.write(texto)
+		f.close()
+def buildPerito(argumentos):
+	cadena=""
+	if(len(argumentos)<3):
+		print ("+******************************************************+")
+		print ("*                Ayuda Modo Perito                     *")
+		print ("*------------------------------------------------------*")
+		print ("* Establecer la identificacion del perito en un archivo*")
+		print ("*------------------------------------------------------*")
+		print ("* La sintaxis que debe usar es:                        *")
+		print ("* forensix pt <archivo> <nombre_perito> <id_perito> <descripcion>*")
+		print ("*------------------------------------------------------*")
+		print ("*------------------------------------------------------*")
+		print ("* Guardar Historico de los comandos utilizados		   *")
+		print ("*------------------------------------------------------*")
+		print ("* forensix <comando utilizado> <-p> <Archivo a Concatenar>*")
+		print ("* <comando utilizado> El comando que se quiere guardar  ")
+		print ("* <-p> Bandera para uso perito  						")
+		print ("* <archivo> Archivo donde se concatena los comandos		")
+		print ("+******************************************************+")
+	elif(len(argumentos)==6):
+		cadena=cadena+"Informe Pericial"+'\n'+'++++++++++++++++++++++++++'+'\n'+'Nombre:'+argumentos[3]
+		cadena=cadena+'\n'+'Id:'+argumentos[4]
+		cadena=cadena+'\n'+'Descripcion:'+argumentos[5]
+		if(checkPath(argumentos[2])):
+			perito(cadena,argumentos[2])
+
+	print('Documento Informe Creado')
+def checkPath(pa):
+	salida=False
+	i=len(pa)-1
+	j=i;
+	while(salida==False and i>0):
+		if(pa[i]=='/'):
+			salida=True
+		i=i-1
+	if(os.path.exists(pa[:i+1])==True):
+		return True
+
+	if(salida==False and j>0):
+		return True
+	else:
+		return False
+def name(pa):
+	salida=False
+	i=len(pa)-1
+	j=i;
+	while(salida==False and i>0):
+		if(pa[i]=='/'):
+			salida=True
+		i=i-1
+	return(pa[i:])
+		
+
+def checkPerito(argumentos):
+	if(argumentos.count('-pt')>0):
+		return True
+	else:
+		return False	
+
+def cortar(argumentos):
+
+	if(len(argumentos)==2):
+		print ("+**********************************************************+")
+		print ("*                Ayuda particionar archivo                 *")
+		print ("*----------------------------------------------------------*")
+		print ("* Dividir un archivo en partes iguales.                    *")
+		print ("*----------------------------------------------------------*")
+		print ("* La sintaxis que debe usar es:                            *")
+		print ("* forensix pt <archivo> <path_copia> <partes>              *")
+		print ("*----------------------------------------------------------*")
+		print ("* archivo: ruta del archivo a particionar                  *")
+		print ("* path_copia: ruta donde se van a guargar las particiones  *")
+		print ("* partes: numero de partes en las que se divide el archivo *")
+		print ("*                                                          *")
+		print ("+**********************************************************+")
+	else:
+		cadena="Particion de archivo:"+'\n'+'*********************************'
+		tam=0;
+		nbloques=0;
+		file_copy=argumentos[2]
+		path_copy=argumentos[3]
+		if(os.path.isfile(file_copy) and checkPath(path_copy)):
+			#resultado=os.popen("stat "+argumentos[2])
+			if(len(argumentos)>4):
+				try:
+					partes=int(argumentos[4])
+					resultado=os.popen("stat "+file_copy)
+					resultado2=resultado.read().split(':')
+					print(len(resultado2))
+					tam=int(resultado2[2][1:resultado2[2][1:].find(' ')+1])
+					nbloques=int(resultado2[3][1:resultado2[3][1:].find(' ')+1])
+					if(nbloques>partes):
+						pbloques=int(nbloques/partes)+1
+						print (pbloques)
+						file_copy=argumentos[2].replace(' ','\ ')
+						path_copy=argumentos[3].replace(' ','\ ')
+						print(path_copy)
+						for i in range(0,partes):
+							if(i==0):
+								retorno=os.popen('dd if='+file_copy+" count="+str(pbloques)+" of="+path_copy+name(file_copy)+str(i+1))
+
+							elif(i==(partes-1)):
+								retorno=os.popen('dd if='+file_copy+" skip="+str(pbloques*(i))+" of="+path_copy+name(file_copy)+str(i+1))
+							else:
+								retorno=os.popen('dd if='+file_copy+" skip="+str(pbloques*(i))+" count="+str(pbloques)+" of="+path_copy+name(file_copy)+str(i+1))
+							cadena=cadena+'\n'+os.popen('stat '+path_copy+name(file_copy)+str(i+1)).read()	
+					#print(resultado2[3].split('     	')[0])
+				except:
+					print("Argumento 4 no es un numero")
+
+				if(checkPerito(argumentos) and len(argumentos)==7):	
+					perito(cadena,argumentos[6])
+
+
+
+
+
+
+		#resultado2=resultado.read().split(':')
+def scan(argumentos):
+	path_scan=argumentos[2]
+	if(os.path.exists(path_scan)):
+		resultado=os.system("./virusT -s "+path_scan)
+def regulares(argumentos,archivo):
+	if(len(argumentos)==2):
+		print ("+*********************************************************************+")
+		print ("*                Ayuda busqueda expresiones regulares                 *")
+		print ("*---------------------------------------------------------------------*")
+		print ("* Realizar busqueda con expresiones regulares                         *")
+		print ("*---------------------------------------------------------------------*")
+		print ("* La sintaxis que debe usar es:                                       *")
+		print ("* forensix er <archivo> <path_busqueda> <path_guardar> <opc>               *")
+		print ("*---------------------------------------------------------------------*")
+		print ("* archivo: ruta del archivo para buscar                               *")
+		print ("* path_busqueda: ruta en la que esta el archivo a realizar la busqueda *")
+		print ("* path_guardar: ruta donde se va a guardar el resultado de la busqueda *")
+		print ("* opc: de la expresion regular en el archivo de expresiones			*")
+		print ("*                                                                     *")
+		print ("+*********************************************************************+")
+	else:
+		path_find=argumentos[2]
+		path_resultados=argumentos[3]
+		opciones=list()
+		i=0
+		if(os.path.exists(path_find) and checkPath(path_resultados)):
+			#resultado=os.popen("stat "+argumentos[2])
+			if(len(argumentos)>4):
+				try:
+					f=open(archivo,"r")
+					for x in f:
+						print(x) 
+						opciones.append(x[:-1])
+						i=i+1
+					f.close() 
+				except:
+					print('Archivo de expresiones no encontrado')
+					
+				try:
+					n_expresion=int(argumentos[4])
+					if(n_expresion>-1 and n_expresion<len(opciones)):
+						print('valida')
+						resultado=os.popen('egrep -rohI '+'"'+opciones[n_expresion]+'"'+' * >> '+path_resultados).read()
+					else:
+						print('no valida')
+
+					
+								
+					#print(resultado2[3].split('     	')[0])
+				except:
+					print("Argumento 4 no es un numero")
+			else:
+				print('Ayuda regulares')
+
+def firma(path):
+	cadena="***************************"+'\n'+'md5hash:'
+	print('***************************')
+	print('Hash MD5:')	
+	md5hash=os.popen('md5sum '+path).read()
+	print(md5hash)
+	cadena=cadena+'\n'+md5hash
+	return cadena
+def otra():
+	print("otra")
+	print(checkPerito(sys.argv))
+def info(path):
+	return (fechaI()+acceso(path)+firma(path))
+		
+def acceso(path):
+	cadena="***************************"+'\n'+'Creacion-Modificacion-Acceso:'
+	print('***************************')
+	print('Creacion-Modificacion-Acceso:')	
+	acc=os.popen('stat '+path).read()
+	print(acc)
+	cadena=cadena+'\n'+acc
+	return cadena
+def fechaI():
+	cadena="***************************"+'\n'+'Fecha actual del Sistema:'
+	print('***************************')
+	print('Fecha actual del Sistema:')
+	fec=os.popen('date').read()
+	print(fec)
+	cadena=cadena+'\n'+fec
+	return cadena
+def mt(argumentos):
+	cadena="Montar Imagen "+'\n'+'*****************************'+'\n'
+	if(len(argumentos)==2):
+		print ("+******************************************************+")
+		print ("*                Ayuda montar imagen                   *")
+		print ("*------------------------------------------------------*")
+		print ("* Montar una imagen en el sistema                      *")
+		print ("*------------------------------------------------------*")
+		print ("* La sintaxis que debe usar es:                        *")
+		print ("* forensix mt <archivo> <path_copia> <nombre_copia>      *")
+		print ("*------------------------------------------------------*")
+		print ("* archivo: ruta del archivo original                   *")
+		print ("* path_copia: ruta donde se va a guardar la copia      *")
+		print ("*                                                      *")
+		print ("+******************************************************+")
+	else:	
+
+		if(os.path.isfile(argumentos[2]) and os.path.exists(argumentos[3])):
+			
+			retorno=os.popen('file '+argumentos[2])
+			file_info=retorno.read().split('startsector')
+			sector=file_info[1][1:file_info[1].find(',')]
+			desplazamiento=int(sector)*512
+			bool_mt=os.popen('sudo mount -r -v -o loop,offset='+str(desplazamiento)+" "+argumentos[2]+" "+argumentos[3])
+			
+
+			print ("Proceso Terminado")
+			
+		else:
+			print("no validos")
+
+argumentos=sys.argv
+
+if(len(argumentos)<2):
+	help()
+else:
+	if(argumentos[1]=='cb'):
+		copiaBitBit(argumentos)
+	elif(argumentos[1]=='mt'):
+		mt(argumentos)
+	elif(argumentos[1]=='ct'):
+		cortar(argumentos)
+	elif(argumentos[1]=='pt'):
+		buildPerito(argumentos)
+	elif(argumentos[1]=='er'):
+		regulares(argumentos,'expregular')
+	elif(argumentos[1]=='vt'):
+		scan(argumentos)
+	elif(argumentos[1]=='ra'):
+		recuparArchivos('argumentos')
+	elif(argumentos[1]=='et'):
+		esterilizacion('argumentos')
+	else:
+		#otra()
+		print(checkPath('./'))
+#print(dir(sys.argv))
+#print(sys.argv)
+
+
+ 	
